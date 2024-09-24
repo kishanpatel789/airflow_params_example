@@ -3,7 +3,7 @@ from airflow.models.dag import DAG
 from airflow.operators.bash import BashOperator
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator, PythonVirtualenvOperator
-from src.python_runner import first_function, process_parameters
+from src.python_runner import process_parameters, run_python_file
 
 extra_packages = "{{ dag_run.conf.get('extra_packages') }}"
 
@@ -16,22 +16,27 @@ with DAG(
     render_template_as_native_obj=True,
     params={},
 ) as dag:
-    empty_task = EmptyOperator(
-        task_id="empty_task",
-    )
 
-    bash_task = BashOperator(
-        task_id="bash_task",
-        bash_command="pip freeze"
-    )
-
-    python_task = PythonOperator(
-        task_id="python_task",
+    process_parameters_py = PythonOperator(
+        task_id="process_parameters_py",
         python_callable=process_parameters,
         op_args=[
             "{{ dag_run.conf['python_file_path'] }}",
             "{{ dag_run.conf['extra_packages'] }}",
-            ]
+        ],
     )
 
-    empty_task >> bash_task >> python_task
+    run_python_file_py = PythonVirtualenvOperator(
+        task_id="run_python_file_py",
+        python_callable=run_python_file,
+        requirements="{{task_instance.xcom_pull(task_ids='process_parameters_py', key='final_packages')}}",
+        serializer="dill",
+        python_version="3.12",
+        system_site_packages=False,
+        op_args=[
+            "{{ dag_run.conf['python_file_path'] }}",
+            "{{task_instance.xcom_pull(task_ids='process_parameters_py', key='final_packages')}}",
+        ],
+    )
+
+    process_parameters_py >> run_python_file_py
