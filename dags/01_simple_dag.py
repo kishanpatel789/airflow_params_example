@@ -21,8 +21,8 @@ with DAG(
         task_id="process_parameters_py",
         python_callable=process_parameters,
         op_args=[
-            "{{ dag_run.conf['python_file_path'] }}",
-            "{{ dag_run.conf['extra_packages'] }}",
+            "{{ dag_run.conf.get('python_file_path', '') }}",
+            "{{ dag_run.conf.get('extra_packages', '') }}",
         ],
     )
 
@@ -40,3 +40,4 @@ with DAG(
     )
 
     process_parameters_py >> run_python_file_py
+
