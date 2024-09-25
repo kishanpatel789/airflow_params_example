@@ -4,7 +4,7 @@ def first_function(extra_arguments):
     print(extra_arguments)
 
 
-STANDARD_PACKAGES = ["boto3", "pandas", "dill", "cloudpickle"]
+STANDARD_PACKAGES = ["boto3>=1.35.0", "pandas>=2.2.0"]
 
 
 def process_parameters(python_file_path: str, extra_packages: list, ti):
@@ -24,7 +24,7 @@ def process_parameters(python_file_path: str, extra_packages: list, ti):
     final_packages = STANDARD_PACKAGES + [
         p for p in extra_packages if p not in seen and not seen.add(p)
     ]
-    final_packages_str = '\n'.join(final_packages)
+    final_packages_str = "\n".join(final_packages)
 
     print(f"python_file_path: {python_file_path}")
     print(f"extra_packages: {extra_packages}")
