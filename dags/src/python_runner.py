@@ -7,7 +7,7 @@ def first_function(extra_arguments):
 STANDARD_PACKAGES = ["boto3", "pandas", "dill", "cloudpickle"]
 
 
-def process_parameters(python_file_path, extra_packages, ti):
+def process_parameters(python_file_path: str, extra_packages: list, ti):
 
     # validate python_file_path
     if not python_file_path.startswith("s3://"):
@@ -24,6 +24,7 @@ def process_parameters(python_file_path, extra_packages, ti):
     final_packages = STANDARD_PACKAGES + [
         p for p in extra_packages if p not in seen and not seen.add(p)
     ]
+    final_packages_str = '\n'.join(final_packages)
 
     print(f"python_file_path: {python_file_path}")
     print(f"extra_packages: {extra_packages}")
@@ -31,6 +32,7 @@ def process_parameters(python_file_path, extra_packages, ti):
 
     # store finalized package list
     ti.xcom_push(key="final_packages", value=final_packages)
+    ti.xcom_push(key="final_packages_str", value=final_packages_str)
 
 
 def run_python_file(python_file_path, final_packages):
