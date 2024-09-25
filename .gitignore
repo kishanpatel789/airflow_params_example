@@ -5,3 +5,5 @@ logs
 .python-version
 venv
 __pycache__
+.terraform*
+terraform.tfvars
