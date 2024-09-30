@@ -1,3 +1,11 @@
+import logging
+from pathlib import Path
+import boto3
+from botocore.exceptions import ClientError
+
+logger = logging.getLogger(__name__)
+
+
 def first_function(extra_arguments):
     print("hello world")
     print(type(extra_arguments))
@@ -26,9 +34,9 @@ def process_parameters(python_file_path: str, extra_packages: list, ti):
     ]
     final_packages_str = "\n".join(final_packages)
 
-    print(f"python_file_path: {python_file_path}")
-    print(f"extra_packages: {extra_packages}")
-    print(f"final_packages: {final_packages}")
+    logger.info(f"python_file_path: {python_file_path}")
+    logger.info(f"extra_packages: {extra_packages}")
+    logger.info(f"final_packages: {final_packages}")
 
     # store finalized package list
     ti.xcom_push(key="final_packages", value=final_packages)
@@ -37,16 +45,27 @@ def process_parameters(python_file_path: str, extra_packages: list, ti):
 
 def run_python_file(python_file_path, final_packages):
 
-    # print target and actual packages installed
-    print(f"final_packages {final_packages}")
-
     import importlib.metadata
+    import logging
+
+    # print target and actual packages installed
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+
+    if not logger.hasHandlers():
+            handler = logging.StreamHandler()
+            # formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+            # handler.setFormatter(formatter)
+            logger.addHandler(handler)
+
+    logger.info(f"final_packages {final_packages}")
+
 
     packages = sorted(
         [f"{p.name}=={p.version}" for p in importlib.metadata.distributions()]
     )
-    print("Here are the packages currently installed: ")
-    print("\n    ".join(packages))
+    logger.info("Here are the packages currently installed: ")
+    logger.info("\n    ".join(packages))
 
     # set up boto3 s3 client
 
@@ -57,3 +76,27 @@ def run_python_file(python_file_path, final_packages):
     # copy python file to local worker
 
     # run python file
+
+
+def upload_file_to_s3(file_name, bucket, object_name=None):
+    """Upload a file to an S3 bucket
+    Modified from https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-uploading-files.html
+
+    :param file_name: File to upload
+    :param bucket: Bucket to upload to
+    :param object_name: S3 object name. If not specified then file_name is used
+    :return: True if file was uploaded, else False
+    """
+
+    # If S3 object_name was not specified, use file_name
+    if object_name is None:
+        object_name = os.path.basename(file_name)
+
+    # Upload the file
+    s3_client = boto3.client('s3')
+    try:
+        response = s3_client.upload_file(str(file_name), bucket, object_name)
+    except ClientError as e:
+        logger.error(e)
+        return False
+    return True
