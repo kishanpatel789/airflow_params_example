@@ -12,4 +12,7 @@ terraform {
 module "aws" {
   source = "./modules/aws"
 
+  region      = var.region
+  aws_profile = var.aws_profile
+  bucket_name = var.bucket_name
 }
