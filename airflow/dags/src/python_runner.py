@@ -49,64 +49,50 @@ def run_python_file(python_file_path, final_packages):
     import logging
     from urllib.parse import urlparse
     import boto3
+    import botocore
+    from tempfile import TemporaryFile
 
-    # print target and actual packages installed
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
-
     if not logger.hasHandlers():
-            handler = logging.StreamHandler()
-            # formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-            # handler.setFormatter(formatter)
-            logger.addHandler(handler)
+        handler = logging.StreamHandler()
+        # formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        # handler.setFormatter(formatter)
+        logger.addHandler(handler)
 
+    # print target and actual packages installed
     logger.info(f"final_packages {final_packages}")
-
-
     packages = sorted(
         [f"{p.name}=={p.version}" for p in importlib.metadata.distributions()]
     )
     logger.info("Here are the packages currently installed: ")
     logger.info("    " + "\n    ".join(packages))
 
-
     # get python file content - s3://bucket-name/somewhere/file/path.py
     parsed_url = urlparse(python_file_path)
     bucket_name = parsed_url.netloc
-    object_key = parsed_url.path.lstrip('/')
+    object_key = parsed_url.path.lstrip("/")
     logger.info(f"Attempting to use file '{object_key}' in bucket '{bucket_name}'")
 
-    s3_client = boto3.client('s3')
+    with TemporaryFile() as f:
+        # download python file content
+        try:
+            s3_client = boto3.client("s3")
+            s3_client.download_fileobj(bucket_name, object_key, f)
+        except botocore.exceptions.ClientError:
+            logger.error(f"Failed to download file '{object_key}'")
 
+        # validate python file syntax
+        f.seek(0)
+        try:
+            code = compile(f.read(), "<string>", "exec")
+        except SyntaxError:
+            logger.error(f"File '{object_key}' does not contain compilable code")
+            raise
 
-    
-
-    # validate python file syntax
-
-    # copy python file to local worker
-
-    # run python file
-
-
-def upload_file_to_s3(file_name, bucket, object_name=None):
-    """Upload a file to an S3 bucket
-    Modified from https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-uploading-files.html
-
-    :param file_name: File to upload
-    :param bucket: Bucket to upload to
-    :param object_name: S3 object name. If not specified then file_name is used
-    :return: True if file was uploaded, else False
-    """
-
-    # If S3 object_name was not specified, use file_name
-    if object_name is None:
-        object_name = os.path.basename(file_name)
-
-    # Upload the file
-    s3_client = boto3.client('s3')
-    try:
-        response = s3_client.upload_file(str(file_name), bucket, object_name)
-    except ClientError as e:
-        logger.error(e)
-        return False
-    return True
+        # run file content
+        try:
+            exec(code)
+        except Exception:
+            logger.error("Failed to execute file content")
+            raise

@@ -8,3 +8,4 @@ __pycache__
 .terraform*
 terraform.tfvars
 *.tfstate*
+tmp_python_file.py
