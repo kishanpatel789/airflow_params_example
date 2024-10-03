@@ -6,7 +6,8 @@ provider "aws" {
 data "aws_caller_identity" "current" {}
 
 locals {
-  aws_account_id = data.aws_caller_identity.current.account_id
+  aws_account_id   = data.aws_caller_identity.current.account_id
+  python_file_path = "${path.root}/src/python_file_to_run.py"
 }
 
 # s3 bucket for python files
@@ -49,4 +50,12 @@ resource "aws_s3_bucket_lifecycle_configuration" "lifecycle_data_lake" {
       days = 120
     }
   }
+}
+
+resource "aws_s3_object" "python_file" {
+  bucket = aws_s3_bucket.bucket_file_repo.bucket
+  key    = "python_file_to_run.py"
+  source = local.python_file_path
+
+  etag = filemd5(local.python_file_path)
 }
