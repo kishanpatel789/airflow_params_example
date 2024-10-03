@@ -47,6 +47,8 @@ def run_python_file(python_file_path, final_packages):
 
     import importlib.metadata
     import logging
+    from urllib.parse import urlparse
+    import boto3
 
     # print target and actual packages installed
     logger = logging.getLogger(__name__)
@@ -65,11 +67,19 @@ def run_python_file(python_file_path, final_packages):
         [f"{p.name}=={p.version}" for p in importlib.metadata.distributions()]
     )
     logger.info("Here are the packages currently installed: ")
-    logger.info("\n    ".join(packages))
+    logger.info("    " + "\n    ".join(packages))
 
-    # set up boto3 s3 client
 
-    # get python file content
+    # get python file content - s3://bucket-name/somewhere/file/path.py
+    parsed_url = urlparse(python_file_path)
+    bucket_name = parsed_url.netloc
+    object_key = parsed_url.path.lstrip('/')
+    logger.info(f"Attempting to use file '{object_key}' in bucket '{bucket_name}'")
+
+    s3_client = boto3.client('s3')
+
+
+    
 
     # validate python file syntax
 
