@@ -1,9 +1,7 @@
 import pendulum
 from airflow.models.dag import DAG
-from airflow.operators.bash import BashOperator
-from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator, PythonVirtualenvOperator
-from src.python_runner import process_parameters, run_python_file, first_function
+from src.python_runner import process_parameters, run_python_file
 
 with DAG(
     dag_id="01_simple_dag",
