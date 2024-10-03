@@ -52,12 +52,18 @@ with DAG(
         python_callable=run_python_file,
         requirements="{{task_instance.xcom_pull(task_ids='process_parameters_py', key='final_packages_str')}}",
         python_version="3.12",
-        system_site_packages=False,
+        system_site_packages="{{ params.system_site_packages }}",
         op_args=[
             "{{ params.python_file_path }}",
             "{{task_instance.xcom_pull(task_ids='process_parameters_py', key='final_packages')}}",
         ],
         venv_cache_path="/home/airflow/venv-cache",
+    )
+    run_python_file_py.template_fields = (
+        "op_kwargs",
+        "op_args",
+        "requirements",
+        "system_site_packages",
     )
 
     process_parameters_py >> run_python_file_py

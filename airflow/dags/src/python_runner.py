@@ -78,6 +78,7 @@ def run_python_file(python_file_path, final_packages):
             s3_client.download_fileobj(bucket_name, object_key, f)
         except botocore.exceptions.ClientError:
             logger.error(f"Failed to download file '{object_key}'")
+            raise
 
         # validate python file syntax
         f.seek(0)

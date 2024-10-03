@@ -49,3 +49,6 @@ with TemporaryFile() as f:
 
 
 # %%
+from airflow.operators.python import PythonVirtualenvOperator
+print(PythonVirtualenvOperator.template_fields)
+# %%
