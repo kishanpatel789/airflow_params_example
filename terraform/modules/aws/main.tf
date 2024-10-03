@@ -16,7 +16,7 @@ resource "aws_s3_bucket" "bucket_file_repo" {
   force_destroy = true
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "encryption_data_lake" {
+resource "aws_s3_bucket_server_side_encryption_configuration" "encryption_file_repo" {
   bucket = aws_s3_bucket.bucket_file_repo.bucket
 
   rule {
@@ -26,7 +26,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "encryption_data_l
   }
 }
 
-resource "aws_s3_bucket_lifecycle_configuration" "lifecycle_data_lake" {
+resource "aws_s3_bucket_lifecycle_configuration" "lifecycle_file_repo" {
   bucket = aws_s3_bucket.bucket_file_repo.id
 
   rule {
