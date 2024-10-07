@@ -49,6 +49,7 @@ with DAG(
         op_args=[
             "{{ params.python_file_path }}",
             "{{ params.extra_packages }}",
+            "{{ params.kw_args }}",
         ],
     )
 

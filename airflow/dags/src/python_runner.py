@@ -4,7 +4,7 @@ logger = logging.getLogger(__name__)
 STANDARD_PACKAGES = ["boto3>=1.35.0", "pandas>=2.2.0"]
 
 
-def process_parameters(python_file_path: str, extra_packages: list, ti):
+def process_parameters(python_file_path: str, extra_packages: list, kw_args: dict, ti):
 
     # validate python_file_path
     if not python_file_path.startswith("s3://"):
@@ -26,6 +26,7 @@ def process_parameters(python_file_path: str, extra_packages: list, ti):
     logger.info(f"python_file_path: {python_file_path}")
     logger.info(f"extra_packages: {extra_packages}")
     logger.info(f"final_packages: {final_packages}")
+    logger.info(f"kw_args: {kw_args}")
 
     # store finalized package list
     ti.xcom_push(key="final_packages", value=final_packages)

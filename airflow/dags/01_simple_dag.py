@@ -19,6 +19,7 @@ with DAG(
         op_args=[
             "{{ dag_run.conf.get('python_file_path', '') }}",
             "{{ dag_run.conf.get('extra_packages', '') }}",
+            "{{ dag_run.conf.get('kw_args', {}) }}",
         ],
     )
 
@@ -30,7 +31,7 @@ with DAG(
         system_site_packages=False,
         op_args=[
             "{{ dag_run.conf['python_file_path'] }}",
-            "{{task_instance.xcom_pull(task_ids='process_parameters_py', key='final_packages')}}",
+            "{{ task_instance.xcom_pull(task_ids='process_parameters_py', key='final_packages') }}",
             "{{ dag_run.conf.get('kw_args', {}) }}",
         ],
         venv_cache_path="/home/airflow/venv-cache",
