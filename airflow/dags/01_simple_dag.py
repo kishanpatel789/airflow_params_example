@@ -8,7 +8,7 @@ with DAG(
     schedule="0 0 * * *",
     start_date=pendulum.datetime(2024, 9, 1, tz="UTC"),
     catchup=False,
-    tags=["level:lame", "usability:confusing"],
+    tags=["level:lame", "usability:low"],
     render_template_as_native_obj=True,
     params={},
 ) as dag:

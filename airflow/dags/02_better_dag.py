@@ -1,3 +1,9 @@
+"""
+# Super Cool Python Runner
+- This dag runs a python file and should be executed with run-time configuration.
+- The target python file must be located in AWS S3 and contain a `main()` function.
+"""
+
 import pendulum
 from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator, PythonVirtualenvOperator
@@ -17,13 +23,13 @@ params = {
     ),
     "extra_packages": Param(
         [],
-        description=f"Enter any additional python packages required for teh python file. Each package should be entered on a separate line without quotation.\nStandard packages: {STANDARD_PACKAGES}",
+        description=f"Enter any additional python packages required for the python file. Each package should be entered on a separate line without quotation.\nStandard packages: {STANDARD_PACKAGES}",
         type="array",
         items={"type": "string"},
     ),
     "kw_args": Param(
         {},
-        description="Enter key-value definitions needed in the python file.",
+        description="Enter any arguments needed by the python file's main() function as key-value pairs. Input should be a python dictionary that passes JSON parsing",
         type="object",
     ),
     "system_site_packages": Param(
@@ -38,9 +44,10 @@ with DAG(
     schedule="0 0 * * *",
     start_date=pendulum.datetime(2024, 9, 1, tz="UTC"),
     catchup=False,
-    tags=["level:amazing", "usability:very"],
+    tags=["level:amazing", "usability:high"],
     render_template_as_native_obj=True,
     params=params,
+    doc_md=__doc__,
 ) as dag:
 
     process_parameters_py = PythonOperator(
