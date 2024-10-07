@@ -40,7 +40,7 @@ def process_parameters(python_file_path: str, extra_packages: list, ti):
     ti.xcom_push(key="final_packages_str", value=final_packages_str)
 
 
-def run_python_file(python_file_path, final_packages):
+def run_python_file(python_file_path, final_packages, file_kw_args):
 
     import importlib.metadata
     import logging
@@ -90,7 +90,7 @@ def run_python_file(python_file_path, final_packages):
 
         # run file content
         try:
-            exec(code)
+            exec(code, file_kw_args)
         except Exception:
             logger.error("Failed to execute file content")
             raise

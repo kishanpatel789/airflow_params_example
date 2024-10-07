@@ -21,6 +21,11 @@ params = {
         type="array",
         items={"type": "string"},
     ),
+    "kw_args": Param(
+        {},
+        description="Enter key-value definitions needed in the python file.",
+        type="object",
+    ),
     "system_site_packages": Param(
         True,
         description="Inherit packages from global site-packages directory",
@@ -55,7 +60,8 @@ with DAG(
         system_site_packages="{{ params.system_site_packages }}",
         op_args=[
             "{{ params.python_file_path }}",
-            "{{task_instance.xcom_pull(task_ids='process_parameters_py', key='final_packages')}}",
+            "{{ task_instance.xcom_pull(task_ids='process_parameters_py', key='final_packages') }}",
+            "{{ params.kw_args }}",
         ],
         venv_cache_path="/home/airflow/venv-cache",
     )
