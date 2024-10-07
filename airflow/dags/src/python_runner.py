@@ -1,14 +1,6 @@
 import logging
 
 logger = logging.getLogger(__name__)
-
-
-def first_function(extra_arguments):
-    print("hello world")
-    print(type(extra_arguments))
-    print(extra_arguments)
-
-
 STANDARD_PACKAGES = ["boto3>=1.35.0", "pandas>=2.2.0"]
 
 
@@ -72,13 +64,13 @@ def run_python_file(python_file_path, final_packages, file_kw_args):
     object_key = parsed_url.path.lstrip("/")
     logger.info(f"Attempting to use file '{object_key}' in bucket '{bucket_name}'")
 
-    python_file_path = Path.cwd() / 'python_file_to_run.py'
+    python_file_path = Path.cwd() / "python_file_to_run.py"
     logger.info(f"Local python file path: {python_file_path}")
 
     # download python file content
     try:
         s3_client = boto3.client("s3")
-        with open(python_file_path, 'w+b') as f:
+        with open(python_file_path, "w+b") as f:
             s3_client.download_fileobj(bucket_name, object_key, f)
             logger.info(f"File '{object_key}' acquired: ")
             f.seek(0)
@@ -89,7 +81,7 @@ def run_python_file(python_file_path, final_packages, file_kw_args):
 
     # validate python file syntax
     try:
-        with open(python_file_path, 'rb') as f:
+        with open(python_file_path, "rb") as f:
             code = compile(f.read(), "<string>", "exec")
             logger.info("Successfully compiled script into code object")
     except SyntaxError:
@@ -97,11 +89,11 @@ def run_python_file(python_file_path, final_packages, file_kw_args):
         raise
 
     # ensure python file has main() function
-    sys.path.append(str(python_file_path.parent.absolute()))    
+    sys.path.append(str(python_file_path.parent.absolute()))
     module_to_run = importlib.import_module(python_file_path.stem)
     if "main" not in dir(module_to_run):
         raise SyntaxError("File does not have a main() function defined")
-    
+
     # run python file
     try:
         logger.info("Running file...")
@@ -117,46 +109,3 @@ def run_python_file(python_file_path, final_packages, file_kw_args):
     except FileNotFoundError:
         logger.error("Failed to remove local python file")
         pass
-
-
-
-    # with TemporaryFile() as f:
-    #     # download python file content
-    #     try:
-    #         s3_client = boto3.client("s3")
-    #         s3_client.download_fileobj(bucket_name, object_key, f)
-    #         logger.info(f"File '{object_key}' acquired: ")
-    #         f.seek(0)
-    #         logger.info(f.read())
-    #     except botocore.exceptions.ClientError:
-    #         logger.error(f"Failed to download file '{object_key}'")
-    #         raise
-        
-    #     # validate python file syntax
-    #     f.seek(0)
-    #     try:
-    #         code = compile(f.read(), "<string>", "exec")
-    #         logger.info("Successfully compiled script into code object")
-    #     except SyntaxError:
-    #         logger.error(f"File '{object_key}' does not contain compilable code")
-    #         raise
-
-    #     # ensure python file has main() function
-    #     def has_main_function(tree: ast.Module):
-    #         for node in ast.walk(tree):
-    #             if isinstance(node, ast.FunctionDef) and node.name == 'main':
-    #                 return True
-    #         return False
-    #     f.seek(0)
-    #     tree = ast.parse(f.read())
-    #     if not has_main_function(tree):
-    #         raise SyntaxError("File does not contain 'main()' function")
-            
-    #     # run file content
-    #     try:
-    #         exec(code)
-    #         logger.info(dir())
-    #         main(**file_kw_args)
-    #     except Exception:
-    #         logger.error("Failed to execute file content")
-    #         raise
