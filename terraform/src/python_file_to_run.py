@@ -5,5 +5,3 @@ def main(name: str, x: int, y: int):
 
     z = x + y 
     print(f"Your answer is: {z}")
-
-main()
