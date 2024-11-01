@@ -6,7 +6,7 @@ The first DAG is simple and does not provide much help to the user. The second D
 
 Project Start: 2024.09.19
 
-Asssociated Blogpost: [Coming soon]
+Asssociated Blogpost: [Airflow Params](https://kpdata.dev/blog/airflow-params/)
 
 ## Architecture
 - Technologies Used
